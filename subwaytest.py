@@ -12,10 +12,10 @@ line2_data = subway_data['2호선']                                      # 호�
 # 메인 윈도우 생성
 root = tk.Tk()
 root.title("수도권 지하철 노선도")
-root.geometry("1200x900")
+root.geometry("1200x1000")
 
 # 캔버스 생성
-canvas = tk.Canvas(root, width=1200, height=900, bg="white")
+canvas = tk.Canvas(root, width=1200, height=1000, bg="white")
 canvas.pack()
 
 # 역과 역 사이 연결선 그리기 함수
@@ -27,8 +27,8 @@ def draw_line(line_data, color):
 
 # 역을 그리는 함수
 def draw_station(name, x, y):
-    canvas.create_oval(x-7, y-7, x+7, y+7, fill="white")
-    canvas.create_text(x, y+20, text=name, font=("Arial", 10))
+    canvas.create_oval(x-5, y-5, x+5, y+5, fill="white")
+    canvas.create_text(x, y+20, text=name, font=("맑은 고딕", 10))
 
     
 def on_station_click(event, stations):
@@ -60,7 +60,6 @@ for line_data, color in lines_data:
         draw_station(name, x, y)
         stations.append({"name": name, "x": x, "y": y})
         # 역 이름에 클릭 이벤트 바인딩
-        #canvas.tag_bind(canvas.create_text(x, y, text=name), '<Button-1>', lambda e, name=name: on_station_click(e, name))
         canvas.bind('<Button-1>', lambda e: on_station_click(e, stations))
 
 # 메인 루프 시작
