@@ -96,11 +96,20 @@ for line_data, color in lines_data:
             # 다음 역 추가 (마지막 역이 아닌 경우)
             if i < len(line_data) - 1:
                 next_station = line_data.iloc[i + 1, 0]
-                if next_station not in landscape:
-                    landscape[next_station] = []
                 if pd.notna(line_data.iloc[i+1,0]):
+                    landscape[next_station] = []
                     landscape[name].append(next_station)  # 현재 역에 다음 역 추가
                     landscape[next_station].append(name)  # 다음 역에 현재 역 추가
+            
+            # D열 이후의 데이터가 있는지 확인하여 landscape에 추가
+            for j in range(3, len(line_data.columns)):  # 3열 이후부터(즉, D열) 확인
+                connected_station_name = line_data.iloc[i, j]
+                if pd.notna(connected_station_name):  # 데이터가 존재하면
+                    # 연결된 역의 좌표 가져오기
+                    connected_station = line_data[line_data.iloc[:, 0] == connected_station_name]
+                    if not connected_station.empty:
+                        landscape[name].append(connected_station.iloc[0, 0])
+                        landscape[connected_station.iloc[0, 0]].append(name)
 
 
             # 역 중복 여부 확인 후 그리기
@@ -110,12 +119,10 @@ for line_data, color in lines_data:
                 draw_station(name, x, y)
                 stations.append({"name": name, "x": x, "y": y})
 
-            print(name,landscape[name])  # 디버그 출력
-        
-        
     # 역 이름에 클릭 이벤트 바인딩
     canvas.bind('<Button-1>', lambda e: on_station_click(e, stations))
-    #print(pd.notna(line_data.iloc[i+1.1]))
+    
+print(landscape)  # 디버그 출력
 
 # ---------- 오른쪽 프레임(출발역, 도착역 설정) ----------
 # 출발역, 도착역을 설정하는 콤보박스와 버튼 추가
