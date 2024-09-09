@@ -1,11 +1,9 @@
 import tkinter as tk
 import pandas as pd
-from tkinter import ttk  # Import ttk for combobox
 from PIL import Image, ImageTk
 
 # 엑셀 파일 불러오기
-file_path = 'C:\\Users\\2C000013\\Documents\\카카오톡 받은 파일\\1호선.xlsx'
-#file_path = 'C:\\Users\\2C000013\\Desktop\\지하철노선.xlsx'
+file_path = 'C:\\Users\\2C000013\\Desktop\\지하철노선.xlsx'
 #file_path = 'C:\\Users\\thsdn\\Downloads\\Subway_Tk-main\\지하철노선.xlsx'
 subway_data = pd.read_excel(file_path, sheet_name=None)
 
@@ -14,12 +12,12 @@ line1_data = subway_data['1호선']
 line2_data = subway_data['2호선']
 line3_data = subway_data['3호선']
 line4_data = subway_data['4호선']
-"""line5_data = subway_data['5호선']
+line5_data = subway_data['5호선']
 line6_data = subway_data['6호선']
 line7_data = subway_data['7호선']
 line8_data = subway_data['8호선']
 line9_data = subway_data['9호선']
-incheon1_data = subway_data['인천1호선']
+"""incheon1_data = subway_data['인천1호선']
 incheon2_data = subway_data['인천2호선']
 shinbundang_data = subway_data['신분당선']
 gyeongui_jungang_data = subway_data['경의중앙선']
@@ -35,11 +33,10 @@ uisinseol_data = subway_data['우이신설선']
 seohae_data = subway_data['서해선']
 gimpo_gold_data = subway_data['김포골드라인']
 """
-
 # 메인 윈도우 생성
 root = tk.Tk()
 root.title("수도권 지하철 노선도")
-root.geometry("1400x900")
+root.geometry("1900x1100")
 root.resizable(False,False)
 
 # 좌측(지하철 노선도)과 우측(출발역, 도착역 설정)을 나누는 프레임
@@ -49,11 +46,21 @@ right_frame = tk.Frame(root, width=400, height=900)
 left_frame.grid(row=0, column=0, padx=0, pady=0)
 right_frame.grid(row=0, column=1, padx=0, pady=0)
 
+image = Image.open("C:\\Users\\2C000013\\Desktop\\서울최종.png")
+image_width = 1500
+image_height = 1000 
+margin_x = 80
+margin_y = 50
 
+resized_image = image.resize((image_width,image_height))
+photo = ImageTk.PhotoImage(resized_image) 
 
 # 캔버스 생성 (왼쪽 프레임에 위치)
-canvas = tk.Canvas(left_frame, width=1000, height=900, bg="white")
+canvas = tk.Canvas(left_frame, width=1600, height=1100, bg="white")
+
 canvas.pack()
+
+canvas.create_image(margin_x,margin_y,image=photo,anchor=tk.NW)
 
 # 역과 역 사이 연결선 그리기 함수
 def draw_line(line_data, color):
@@ -106,14 +113,15 @@ lines_data = [
     (line2_data, "green"),          # 2호선
     (line3_data, "orange"),         # 3호선
     (line4_data, "skyblue"),        # 4호선
-]
-
-"""(line5_data, "purple"),         # 5호선
+    (line5_data, "purple"),         # 5호선
     (line6_data, "brown"),          # 6호선
     (line7_data, "forestgreen"),    # 7호선
     (line8_data, "pink"),           # 8호선
     (line9_data, "gold"),           # 9호선
-    (incheon1_data, "navy"),        # 인천1호선
+    
+]
+
+"""(incheon1_data, "navy"),        # 인천1호선
     (incheon2_data, "lightgreen"),  # 인천2호선
     (shinbundang_data, "red"),      # 신분당선
     (gyeongui_jungang_data, "olive"), # 경의중앙선
@@ -128,7 +136,7 @@ lines_data = [
     (uisinseol_data, "darkgray"),    # 우이신설선
     (seohae_data, "lightpink"),      # 서해선
     (gimpo_gold_data, "gold")        # 김포골드라인"""
-
+    
 stations = []
 
 landscape = {}
