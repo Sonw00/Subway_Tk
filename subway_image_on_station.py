@@ -5,7 +5,7 @@ import copy
 
 # 엑셀 파일 불러오기5
 #file_path = 'C:\\Users\\2C000013\\Desktop\\지하철노선.xlsx'
-file_path = 'C:\\Users\\thsdn\\Downloads\\Subway_Tk-main (2)\Subway_Tk-main\\수도권지하철노선.xlsx'
+file_path = 'C:\\Users\\2C000013\\Downloads\\Subway_Tk-main\\수도권지하철노선 데이터 추가.xlsx'
 subway_data = pd.read_excel(file_path, sheet_name=None)
 
 # 1호선과 2호선 데이터 불러오기
@@ -13,27 +13,28 @@ line1_data = subway_data['1호선']
 line2_data = subway_data['2호선']
 line3_data = subway_data['3호선']
 line4_data = subway_data['4호선']
-"""line5_data = subway_data['5호선']
+line5_data = subway_data['5호선']
 line6_data = subway_data['6호선']
 line7_data = subway_data['7호선']
 line8_data = subway_data['8호선']
 line9_data = subway_data['9호선']
-incheon1_data = subway_data['인천1호선']
-incheon2_data = subway_data['인천2호선']
-shinbundang_data = subway_data['신분당선']
+airport_data = subway_data['공항철도']
 gyeongui_jungang_data = subway_data['경의중앙선']
 gyeongchun_data = subway_data['경춘선']
 suin_bundang_data = subway_data['수인분당선']
-airport_data = subway_data['공항철도']
-sinlim_data = subway_data['신림선']
-uijeongbu_data = subway_data['의정부경전철']
-everline_data = subway_data['에버라인']
-gtx_a_data = subway_data['GTX-A']
+shinbundang_data = subway_data['신분당선']
 gyeonggang_data = subway_data['경강선']
-uisinseol_data = subway_data['우이신설선']
 seohae_data = subway_data['서해선']
+incheon1_data = subway_data['인천1호선']
+incheon2_data = subway_data['인천2호선']
+uijeongbu_data = subway_data['의정부경전철']
+uisinseol_data = subway_data['우이신설선']
+everline_data = subway_data['에버라인']
+sinlim_data = subway_data['신림선']
+gtx_a_data = subway_data['GTX-A']
+uisinseol_data = subway_data['우이신설선']
 gimpo_gold_data = subway_data['김포골드라인']
-"""
+
 # 메인 윈도우 생성
 root = tk.Tk()
 root.title("수도권 지하철 노선도")
@@ -44,11 +45,12 @@ root.resizable(False,False)
 left_frame = tk.Frame(root, width=1300, height=1100)
 right_frame = tk.Frame(root, width=400, height=1100)
 
+
 left_frame.grid(row=0, column=0, padx=0, pady=0,sticky='nsew')
 right_frame.grid(row=0, column=1, padx=0, pady=0,sticky='nsew')
 
 #image = Image.open("C:\\Users\\2C000013\\Desktop\\서울최종.png")
-image = Image.open('C:\\Users\\thsdn\\Downloads\\Subway_Tk-main (2)\\Subway_Tk-main\\사진\\수도권지하철.png')
+image = Image.open('C:\\Users\\2C000013\\Downloads\\Subway_Tk-main\\사진\\수도권지하철.png')
 image_width = 1300
 image_height = 1100 
 margin_x = 0
@@ -93,14 +95,27 @@ def draw_transfer_station(name,x,y):
     #canvas.create_text(x, y+20, text=name, font=("맑은 고딕", 10))
 
 # 역을 클릭하면 출력하는 함수
-def on_station_click(event, stations):
+def on_station_click(event):
     x, y = event.x, event.y
     for station in stations:
         station_x, station_y = station['x'], station['y']
         if abs(x - station_x) < 10 and abs(y - station_y) < 10:  # 좌표 근처 클릭 감지
+            if current_textbox == 'start':
+                start_station_var.set(station['name'])  # 출발역 설정
+            elif current_textbox == 'end':
+                end_station_var.set(station['name'])  # 도착역 설정
             print(f"{station['name']} 역이 클릭되었습니다.")
             break
-    
+
+# 클릭된 텍스트 박스를 기록할 변수
+current_textbox = None
+
+# 텍스트 박스 클릭 시 클릭된 텍스트 박스를 기록하는 함수
+def on_textbox_click(name):
+    global current_textbox
+    current_textbox = name
+    print(f"{name} 텍스트 박스 클릭됨")
+
     
 # 중복 여부를 확인하는 함수
 def is_station_duplicate(name, stations):
@@ -111,34 +126,31 @@ def is_station_duplicate(name, stations):
 
 # 각 호선의 데이터를 처리하기 위한 리스트
 lines_data = [
-    (line1_data, "blue", "1호선"),           # 1호선
-    (line2_data, "green", "2호선"),          # 2호선
-    (line3_data, "orange", "3호선"),         # 3호선
-    (line4_data, "skyblue", "4호선"),        # 4호선
-    
+    (line1_data, "#004CA1", "1호선"),           # 1호선
+    (line2_data, "#1A9F58", "2호선"),          # 2호선
+    (line3_data, "#EB6E1C", "3호선"),         # 3호선
+    (line4_data, "#09A1D3", "4호선"),        # 4호선
+    (line5_data, "#9669B3","5호선"),         # 5호선
+    (line6_data, "#C08743","6호선"),          # 6호선
+    (line7_data, "#65700B","7호선"),    # 7호선
+    (line8_data, "#DD709C","8호선"),           # 8호선
+    (line9_data, "#C0B6AD","9호선"),           # 9호선
+    (airport_data, "#6AB0C1","공항철도"),       # 공항철도
+    (gyeongui_jungang_data, "#6CB995","경의중앙선"), # 경의중앙선
+    (gyeongchun_data, "#2E927C","경춘선"),  # 경춘선
+    (suin_bundang_data, "#F6CC32","수인분당선"),   # 수인분당선
+    (shinbundang_data, "#B81B4A","신분당선"),      # 신분당선
+    (gyeonggang_data, "#0070C0","경강선"),  # 경강선
+    (seohae_data, "#8DBF3A","서해선"),      # 서해선
+    (incheon1_data, "#BFD1DF","인천1호선"),        # 인천1호선
+    (incheon2_data, "#E9B867","인천2호선"),  # 인천2호선
+    (uijeongbu_data, "#E4B000","의정부 경전철"),        # 의정부 경전철
+    (uisinseol_data, "#CED069","우이신설선"),    # 우이신설선
+    (everline_data, "#63A146","에버라인(용인경전철)"),  # 에버라인
+    (sinlim_data, "#6B7D9C","신림선"),      # 신림선
+    (gtx_a_data, "#905783","GTX-A"),        # GTX-A
+    (gimpo_gold_data, "#C2A956","김포골드라인")        # 김포골드라인
 ]
-
-"""
-    (line5_data, "purple"),         # 5호선
-    (line6_data, "brown"),          # 6호선
-    (line7_data, "forestgreen"),    # 7호선
-    (line8_data, "pink"),           # 8호선
-    (line9_data, "gold"),           # 9호선
-    (incheon1_data, "navy"),        # 인천1호선
-    (incheon2_data, "lightgreen"),  # 인천2호선
-    (shinbundang_data, "red"),      # 신분당선
-    (gyeongui_jungang_data, "olive"), # 경의중앙선
-    (gyeongchun_data, "forestgreen"),  # 경춘선
-    (suin_bundang_data, "yellow"),   # 수인분당선
-    (airport_data, "skyblue"),       # 공항철도
-    (sinlim_data, "darkgreen"),      # 신림선
-    (uijeongbu_data, "lime"),        # 의정부 경전철
-    (everline_data, "lightyellow"),  # 에버라인
-    (gtx_a_data, "darkblue"),        # GTX-A
-    (gyeonggang_data, "lightblue"),  # 경강선
-    (uisinseol_data, "darkgray"),    # 우이신설선
-    (seohae_data, "lightpink"),      # 서해선
-    (gimpo_gold_data, "gold")        # 김포골드라인"""
     
 stations = []
 line_info = {}
@@ -153,8 +165,6 @@ for line_data, color, info in lines_data:
     # 역 그리기
     for i, row in line_data.iterrows():
         
-            
-        
         if pd.notna(line_data.iloc[i,0]):
             name, x, y = row.iloc[0], row.iloc[1], row.iloc[2]
 
@@ -162,15 +172,18 @@ for line_data, color, info in lines_data:
             if name not in line_info:
                 line_info[name] = []
                 line_info[name].append(info)
+            else :
+                line_info[name].append(info)
             # landscape에 현재 역 추가
             if name not in landscape:
-                landscape[name] = []
+                landscape[name] = [] 
 
             # 다음 역 추가 (마지막 역이 아닌 경우)
             if i < len(line_data) - 1:
                 next_station = line_data.iloc[i + 1, 0]
                 if pd.notna(line_data.iloc[i+1,0]):
-                    landscape[next_station] = []
+                    if next_station not in landscape:
+                        landscape[next_station] = []
                     landscape[name].append(next_station)  # 현재 역에 다음 역 추가
                     landscape[next_station].append(name)  # 다음 역에 현재 역 추가
             
@@ -195,12 +208,12 @@ for line_data, color, info in lines_data:
                 stations.append({"name": name, "x": x, "y": y})
 
     # 역 이름에 클릭 이벤트 바인딩
-    canvas.bind('<Button-1>', lambda e: on_station_click(e, stations))
+    canvas.bind('<Button-1>', on_station_click)
     
-print(landscape)  # 디버그 출력
+#print(landscape)  # 디버그 출력
 print()
 print()
-print(line_info)
+#print(line_info)
 
 # ---------- 오른쪽 프레임(출발역, 도착역 설정) ----------
 # 출발역, 도착역을 설정하는 콤보박스와 버튼 추가
@@ -214,7 +227,7 @@ def update_combobox(event, combobox, station_list):
         combobox['values'] = station_list  # 아무 입력이 없으면 전체 리스트
     else:
         # 입력된 텍스트로 시작하는 역들 필터링
-        filtered_stations = [station for station in station_list if station.startswith(typed_text)]
+        filtered_stations = [station for station in station_list if station.lower().startswith(typed_text.lower())]
         combobox['values'] = filtered_stations  # 필터링된 리스트 적용
     combobox.event_generate('<Down>')  # 첫 번째 항목을 자동으로 선택되도록 설정
 
@@ -243,36 +256,48 @@ end_station_combobox.pack(pady=10)
 # 도착역 검색 시 자동완성 기능 추가
 end_station_combobox.bind('<KeyRelease>', lambda event: update_combobox(event, end_station_combobox, station_names))
 
-# 최단 시간 계산 함수 (임시로 출발역과 도착역만 출력)
+# 출발역 텍스트 박스 클릭 시
+start_station_combobox.bind('<Button-1>', lambda event: on_textbox_click('start'))
+
+# 도착역 텍스트 박스 클릭 시
+end_station_combobox.bind('<Button-1>', lambda event: on_textbox_click('end'))
+
+    
+# 최단 시간 계산 함수 
 def calculate_shortest_time():
     start_station = start_station_var.get()  # 출발역
     end_station = end_station_var.get()  # 도착역
-    
+
     if start_station and end_station:
         print(f"출발역: {start_station}, 도착역: {end_station}")
 
         # 각 역에 대한 초기 설정
         routing = {}
         for place in landscape.keys():
-            routing[place] = {'shortestDist': float('inf'), 'route': [], 'visited': 0}
-        
+            routing[place] = {'shortestDist': float('inf'), 'route': [], 'visited': False}
+
         # 출발점 초기화
-        routing[start_station] = {'shortestDist': 0, 'route': [start_station], 'visited': 0}
+        routing[start_station]['shortestDist'] = 0
+        routing[start_station]['route'] = [start_station]
 
         # 방문할 역 처리 함수
-        def visitPlace(visit):
-            routing[visit]['visited'] = 1
+        def visitPlace(visit, previous_line=None):
+            routing[visit]['visited'] = True
             current_line = line_info[visit]  # 현재 역의 노선
+
+            # 이전 역이 없을 경우 (즉, 출발역인 경우)
+            if previous_line is None:
+                previous_line = current_line
 
             # 현재 역에서 갈 수 있는 모든 역을 탐색
             for next_station in landscape[visit]:
                 next_line = line_info[next_station]  # 다음 역의 노선
-                
+
                 # 환승 시간 고려: 다른 노선으로 갈아탈 경우 6분 추가
-                if current_line == next_line:
-                    additional_time = 2  # 같은 노선일 경우 이동 시간은 2분
+                if not set(previous_line).intersection(set(next_line)):  # 이전 역과 겹치는 노선이 없는 경우
+                    additional_time = 16  # 환승 시 6분 추가
                 else:
-                    additional_time = 2 + 6  # 환승할 경우 2분 + 환승 6분
+                    additional_time = 2  # 같은 노선일 경우 이동 시간은 2분
 
                 toDist = routing[visit]['shortestDist'] + additional_time
 
@@ -281,6 +306,11 @@ def calculate_shortest_time():
                     routing[next_station]['shortestDist'] = toDist
                     routing[next_station]['route'] = copy.deepcopy(routing[visit]['route'])
                     routing[next_station]['route'].append(next_station)
+
+            # 다음 역을 방문할 때 현재 역의 노선 정보를 전달
+            for next_station in landscape[visit]:
+                if not routing[next_station]['visited']:
+                    visitPlace(next_station, current_line)  # current_line을 previous_line으로 전달
 
         # 출발점에서 첫 방문 처리
         visitPlace(start_station)
@@ -291,7 +321,7 @@ def calculate_shortest_time():
             toVisit = ''
             # 방문하지 않은 곳 중에서 가장 짧은 거리를 가진 역 선택
             for name, search in routing.items():
-                if 0 <= search['shortestDist'] < minDist and not search['visited']:
+                if search['shortestDist'] < minDist and not search['visited']:
                     minDist = search['shortestDist']
                     toVisit = name
             if toVisit == '':
@@ -302,24 +332,62 @@ def calculate_shortest_time():
         # 결과 출력
         route = routing[end_station]['route']
         shortest_time = routing[end_station]['shortestDist']
-        
-        # 환승역 확인
-        transfer_stations = []
-        for i in range(1, len(route)):
-            if line_info[route[i-1]] != line_info[route[i]]:
-                transfer_stations.append(route[i-1])
 
+        # 환승역 확인 및 각 구간 시간 계산
+        transfer_stations = []
+        section_times = []
+        total_time = 0
+
+        for i in range(1, len(route)):
+            previous_station = route[i - 1]
+            current_station = route[i]
+            previous_line = line_info[previous_station]  # 이전 역의 노선 정보
+            current_line = line_info[current_station]
+            
+            # 이전 역과 현재 역이 같은 노선이면 2분, 다른 노선이면 6분 추가
+            if set(previous_line).intersection(set(current_line)):
+                section_time = 2
+            else:
+                section_time = 16  # 환승 시 16분
+            
+            section_times.append(section_time)  # 구간별 소요 시간 추가
+            total_time += section_time
+
+            # 다음 역이 존재하는지 검사
+            if i < len(route) - 1:  # 마지막 역이 아니면 다음 역을 검사
+                next_line = line_info[route[i + 1]]  # 다음 역의 노선 정보
+                
+                if not set(previous_line).intersection(set(next_line)):  # 다른 노선으로 갈아탈 때
+                    transfer_stations.append(current_station)  # 환승역 추가
+
+        # 환승역과 각 구간의 소요 시간 출력
+        detailed_route = []
+        sum = 0
+        
+        for i in range(len(route) - 1):
+            sum += section_times[i]
+            # route[i]가 환승역에 포함되어 있는지 확인
+            if route[i] in transfer_stations:
+                detailed_route.append(f"{route[i]} -> {route[i + 1]} ({sum}분)")
+                sum=0
+        
+        # 마지막 역까지 누적된 시간 출력
+        detailed_route.append(f"{route[-2]} -> {route[-1]} ({sum}분)")
+        
         # 환승역이 없는 경우 출력
         if not transfer_stations:
             print(f"출발역: {start_station} -> 도착역: {end_station}")
             print(f"소요 시간: {shortest_time}분")
             result_label.config(text=f"출발역: {start_station} -> 도착역: {end_station}\n소요 시간: {shortest_time}분")
-        
         # 환승역이 있는 경우 출력
         else:
             print(f"출발역: {start_station} -> 환승역: {', '.join(transfer_stations)} -> 도착역: {end_station}")
             print(f"소요 시간: {shortest_time}분")
-            result_label.config(text=f"출발역: {start_station} -> 환승역: {', '.join(transfer_stations)} -> 도착역: {end_station}\n소요 시간: {shortest_time}분")
+            print("구간별 소요 시간:")
+            for section in detailed_route:
+                print(section)
+            result_label.config(text=f"출발역: {start_station} \n 환승역: {'\n->'.join(transfer_stations)} \n 도착역: {end_station}\n소요 시간: {shortest_time}분\n\n구간별 소요 시간:\n" + "\n".join(detailed_route))
+
             
 # 최단 시간 계산 버튼
 calculate_button = tk.Button(right_frame, text="최단 시간 계산", command=calculate_shortest_time)
