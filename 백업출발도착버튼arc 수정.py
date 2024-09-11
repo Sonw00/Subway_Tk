@@ -87,14 +87,12 @@ def draw_line(line_data, color):
 
 # 역을 그리는 함수
 def draw_station(name, x, y):
-    #canvas.create_oval(x-1, y-1, x, y, fill="white")
-    canvas.create_text(x, y+15, text='', font=("맑은 고딕", 9))
-    #canvas.create_text(x, y+15, text='name', font=("맑은 고딕", 9))
+    canvas.create_oval(x-4, y-4, x+4, y+4, fill="white")
+    canvas.create_text(x, y+15, text=name, font=("맑은 고딕", 9))
     
 def draw_transfer_station(name,x,y):
-    #canvas.create_oval(x-1, y-1, x, y, fill="white")
-    #canvas.create_text(x, y+20, text='name', font=("맑은 고딕", 10))
-    canvas.create_text(x, y+20, text='', font=("맑은 고딕", 10))
+    canvas.create_oval(x-7, y-7, x+7, y+7, fill="white")
+    #canvas.create_text(x, y+20, text=name, font=("맑은 고딕", 10))
 
 # 역을 클릭하면 출력하는 함수
 """def on_station_click(event):
@@ -111,92 +109,68 @@ def draw_transfer_station(name,x,y):
             print(f"{station['name']} 역이 클릭되었습니다.")
             break"""
             
-selected_station = {'start': None, 'end': None,'start_button': None,'end_button': None}  # 출발과 도착 역 정보를 저장하는 딕셔너리
+selected_arcs = {'start': None, 'end': None}  # 출발과 도착 역 정보를 저장하는 딕셔너리
 hovered_item = {'x': None, 'oval': None}  # 현재 마우스가 올려진 도형 정보
 
 def on_station_click(event):
-    global selected_station
+    global selected_arcs
     x, y = event.x, event.y
     for station in stations:
         station_x, station_y = station['x'], station['y']
         if abs(x - station_x) < 10 and abs(y - station_y) < 10:  # 좌표 근처 클릭 감지
             # 출발 지점 선택
-            if not selected_station['start']:
-                button = create_buttons(station_x, station_y, 'start')
+            if not selected_arcs['start']:
+                arc = canvas.create_arc(station_x - 40, station_y - 40, station_x + 40, station_y + 40,
+                                        start=60, extent=60, fill="red", width=2)
                 text = canvas.create_text(station_x, station_y - 25, text="출발", fill="white", font=("맑은 고딕", 9))
-                selected_station['start'] = {'button': button, 'text': text, 'station': station['name']}
+                selected_arcs['start'] = {'arc': arc, 'text': text, 'station': station['name']}
                 start_station_var.set(station['name'])  # 출발역 설정
             # 도착 지점 선택 (출발이 선택된 상태에서)
-            elif not selected_station['end']:
-                button = create_buttons(station_x, station_y, 'end')
+            elif not selected_arcs['end']:
+                arc = canvas.create_arc(station_x - 40, station_y - 40, station_x + 40, station_y + 40,
+                                        start=60, extent=60, fill="blue", width=2)
                 text = canvas.create_text(station_x, station_y - 25, text="도착", fill="white", font=("맑은 고딕", 9))
-                selected_station['end'] = {'button': button, 'text': text, 'station': station['name']}
+                selected_arcs['end'] = {'arc': arc, 'text': text, 'station': station['name']}
                 end_station_var.set(station['name'])  # 도착역 설정
             break
     
-    #canvas.bind("<Motion>", on_hover)  # 마우스가 움직일 때 hover 이벤트 활성화
-    #canvas.bind("<Leave>", clear_hover)  # 캔버스에서 마우스가 벗어나면 hover 초기화
+    canvas.bind("<Motion>", on_hover)  # 마우스가 움직일 때 hover 이벤트 활성화
+    canvas.bind("<Leave>", clear_hover)  # 캔버스에서 마우스가 벗어나면 hover 초기화
 
-def create_buttons(station_x, station_y, type):
-    """주어진 좌표에 출발 또는 도착 버튼을 생성"""
-    button = tk.Button(canvas, text="출발" if type == 'start' else "도착",
-                       command=lambda: select_point(station_x, station_y, type))
-    button.place(x=station_x - 20, y=station_y - 30)
-    
-    # 마우스가 버튼 위에 들어갔을 때(on_hover)와 나갔을 때(clear_hover) 이벤트 추가
-    button.bind("<Enter>", lambda event: on_hover(event,type))
-    button.bind("<Leave>", lambda event: clear_hover(event))
-    selected_station[f'{type}_button'] = button
-    
-def select_point(station_x, station_y, type):
-    """출발 또는 도착 버튼 클릭 시 호출되는 함수"""
-    button = selected_station[f'{type}_button']
-    button.destroy()  # 버튼 제거
-    global hovered_item
-    if hovered_item['x']:
-        canvas.delete(hovered_item['x'])  # X 표시 제거
-        hovered_item['x'] = None
-    if hovered_item['oval']:
-        canvas.delete(hovered_item['oval'])  # 원형 표시 제거
-        hovered_item['oval'] = None
-    if type=='start':
-        start_station_var.set('')  # 출발역 설정
-    elif type == 'end':
-        end_station_var.set('')  # 출발역 설정
-    canvas.delete(selected_station[type]['text'])
-
-    
-    selected_station[type] = None
-    selected_station[f'{type}_button'] = None  # 버튼 제거 완료
-    
-def on_hover(event,type):
+def on_hover(event):
     global hovered_item
     x, y = event.x, event.y
-    if type == 'start':
-        start_button = selected_station['start_button']
-        start_x, start_y = start_button.winfo_x(), start_button.winfo_y()
-        start_w, start_h = start_button.winfo_width(), start_button.winfo_height()
-        print("x:",x,", y:",y,", start_x:",start_x,", start_y",start_y)
-        if not hovered_item['x']:  # X 표시가 없으면 추가
-                hovered_item['oval'] = canvas.create_oval(start_x+start_w, start_y, start_x+start_w+8, start_y+8, fill="white", outline="black")
-                hovered_item['x'] = canvas.create_text(start_x+start_w+4, start_y+4, text="X", fill="black", font=("맑은 고딕", 10))
-        return
+    
+    # 출발 arc에 마우스가 올려졌는지 확인
+    if selected_arcs['start']:
+        start_coords = canvas.coords(selected_arcs['start']['arc'])
+        if start_coords[0] <= x <= start_coords[2] and start_coords[1] <= y <= start_coords[3]:
+            if not hovered_item['x']:  # X 표시가 없으면 추가
+                margin = 3
+                hovered_item['oval'] = canvas.create_oval(start_coords[2]-26-margin, start_coords[1]+2-margin, 
+                                                        start_coords[2]-18+margin, start_coords[1]+10+margin, 
+                                                        fill="white", outline="black")
 
-    # 도착 버튼에 마우스가 올려졌는지 확인
-    if type == 'end':
-        end_button = selected_station['end_button']
-        end_x, end_y = end_button.winfo_x(), end_button.winfo_y()
-        end_w, end_h = end_button.winfo_width(), end_button.winfo_height()
-        print("x:",x,", y:",y,", end_x:",end_w,", end_y",end_y)
-        if not hovered_item['x']:  # X 표시가 없으면 추가
-            hovered_item['oval'] = canvas.create_oval(end_x+end_w, end_y, end_x+end_w+8, end_y+8, fill="white", outline="black")
-            hovered_item['x'] = canvas.create_text(end_x+end_w+4, end_y+4, text="X", fill="black", font=("맑은 고딕", 10))
-        return
+                hovered_item['x'] = canvas.create_text(start_coords[2]-22, start_coords[1]+6, 
+                                                    text="X", fill="black", font=("맑은 고딕", 10))
+            return
+    
+    # 도착 arc에 마우스가 올려졌는지 확인
+    if selected_arcs['end']:
+        end_coords = canvas.coords(selected_arcs['end']['arc'])
+        if end_coords[0] <= x <= end_coords[2] and end_coords[1] <= y <= end_coords[3]:
+            if not hovered_item['x']:  # X 표시가 없으면 추가
+                margin = 3
+                hovered_item['oval'] = canvas.create_oval(end_coords[2]-26-margin, end_coords[1]+2-margin, 
+                                                        end_coords[2]-18+margin, end_coords[1]+10+margin, 
+                                                        fill="white", outline="black")
 
-    # 아무 버튼에도 마우스가 없으면 X 표시 제거
+                hovered_item['x'] = canvas.create_text(end_coords[2]-22, end_coords[1]+6, 
+                                                    text="X", fill="black", font=("맑은 고딕", 10))
+            return
+    
+    # 아무 arc에도 마우스가 없으면 X 표시 제거
     clear_hover(event)
-
-
 
 def clear_hover(event):
     global hovered_item
@@ -207,8 +181,34 @@ def clear_hover(event):
         canvas.delete(hovered_item['oval'])  # 원형 표시 제거
         hovered_item['oval'] = None
 
+# arc를 클릭하면 삭제하는 함수
+def on_arc_click(event):
+    print('click')
+    x, y = event.x, event.y
+    
+    # 출발 arc에 대한 클릭 처리
+    if selected_arcs['start']:
+        start_coords = canvas.coords(selected_arcs['start']['arc'])
+        if start_coords[0] <= x <= start_coords[2] and start_coords[1] <= y <= start_coords[3]:
+            canvas.delete(selected_arcs['start']['arc'])
+            canvas.delete(selected_arcs['start']['text'])
+            selected_arcs['start'] = None
+            clear_hover(event)
+            return "break"  # 이벤트 전파 중단
+
+    # 도착 arc에 대한 클릭 처리
+    if selected_arcs['end']:
+        end_coords = canvas.coords(selected_arcs['end']['arc'])
+        if end_coords[0] <= x <= end_coords[2] and end_coords[1] <= y <= end_coords[3]:
+            canvas.delete(selected_arcs['end']['arc'])
+            canvas.delete(selected_arcs['end']['text'])
+            selected_arcs['end'] = None
+            clear_hover(event)
+            return "break"  # 이벤트 전파 중단
+
 # 클릭 이벤트 연결
 canvas.bind("<Button-1>", on_station_click)
+canvas.bind("<Button-1>", on_arc_click, add="+")  # arc에 대한 클릭 이벤트 추가
 
 
 # 클릭된 텍스트 박스를 기록할 변수
@@ -263,7 +263,7 @@ landscape = {}
 # 1호선과 2호선의 역과 연결선 그리기
 for line_data, color, info in lines_data:
     # 연결선 그리기
-    #draw_line(line_data, color)
+    draw_line(line_data, color)
         
     
     # 역 그리기
