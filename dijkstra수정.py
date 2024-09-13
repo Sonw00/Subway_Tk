@@ -4,8 +4,8 @@ from PIL import Image, ImageTk
 import copy
 
 # 엑셀 파일 불러오기5
-file_path = 'C:\\Users\\thsdn\\Downloads\\Subway_Tk-main\\수도권지하철노선 데이터 추가.xlsx'
-#file_path = 'C:\\Users\\2C000013\\Downloads\\Subway_Tk-main\\수도권지하철노선 데이터 추가.xlsx'
+#file_path = 'C:\\Users\\thsdn\\Downloads\\Subway_Tk-main\\수도권지하철노선 데이터 추가.xlsx'
+file_path = 'C:\\Users\\2C000013\\Downloads\\Subway_Tk-main\\수도권지하철노선 데이터 추가.xlsx'
 subway_data = pd.read_excel(file_path, sheet_name=None)
 
 # 1호선과 2호선 데이터 불러오기
@@ -49,8 +49,8 @@ right_frame = tk.Frame(root, width=400, height=1100)
 left_frame.grid(row=0, column=0, padx=0, pady=0,sticky='nsew')
 right_frame.grid(row=0, column=1, padx=0, pady=0,sticky='nsew')
 
-image = Image.open("C:\\Users\\thsdn\\Downloads\\Subway_Tk-main\\사진\\수도권지하철.png")
-#image = Image.open('C:\\Users\\2C000013\\Downloads\\Subway_Tk-main\\사진\\수도권지하철.png')
+#image = Image.open("C:\\Users\\thsdn\\Downloads\\Subway_Tk-main\\사진\\수도권지하철.png")
+image = Image.open('C:\\Users\\2C000013\\Downloads\\Subway_Tk-main\\사진\\수도권지하철.png')
 image_width = 1300
 image_height = 1100 
 margin_x = 0
@@ -392,141 +392,168 @@ end_station_combobox.pack(pady=10)
 
 # 도착역 검색 시 자동완성 기능 추가
 end_station_combobox.bind('<KeyRelease>', lambda event: update_combobox(event, end_station_combobox, station_names))
-
+# 출발역 텍스트 박스 클릭 시
+def on_textbox_click(type):
+    # 해당 이벤트 핸들러 정의 필요
+    pass
 # 출발역 텍스트 박스 클릭 시
 start_station_combobox.bind('<Button-1>', lambda event: on_textbox_click('start'))
 
 # 도착역 텍스트 박스 클릭 시
 end_station_combobox.bind('<Button-1>', lambda event: on_textbox_click('end'))
-
+def on_combobox_select(event, type):
+    # 해당 이벤트 핸들러 정의 필요
+    pass
 # 콤보박스에서 항목이 선택되었을 때 실행되는 이벤트 바인딩
 start_station_combobox.bind("<<ComboboxSelected>>", lambda event: on_combobox_select(event, 'start'))
 end_station_combobox.bind("<<ComboboxSelected>>", lambda event: on_combobox_select(event, 'end'))
 
 
 # 최단 시간 계산 함수 
-def calculate_shortest_time():
-    start_station = start_station_var.get()  # 출발역
-    end_station = end_station_var.get()  # 도착역
+class SubwayRouteCalculator:
+    def __init__(self, start_station_var, end_station_var, line_info, landscape):
+        self.start_station_var = start_station_var
+        self.end_station_var = end_station_var
+        self.line_info = line_info  # 각 역의 노선 정보
+        self.landscape = landscape  # 각 역에서 이동할 수 있는 다른 역
+        self.routing = []  # 최단 경로를 저장할 리스트
 
-    if start_station and end_station:
-        print(f"출발역: {start_station}, 도착역: {end_station}")
-        routing[start_station] = {'route': [], 'visited': False, 'additional_time': 0}
+    def calculate_shortest_time(self):
+        # 출발역과 도착역 설정
+        start_station = self.start_station_var.get()
+        end_station = self.end_station_var.get()
 
-        # 각 역에 대한 초기 설정
-        routing = {}
-        #print("landscape.keys:",landscape.keys())
-        #for place in landscape.keys():
+        if start_station and end_station:
+            print(f"출발역: {start_station}, 도착역: {end_station}")
+            self.routing = []  # 경로 초기화
 
-        # 방문할 역 처리 함수
-        def visitPlace(visit, previous_station=None):
-            #routing[visit]['visited'] = True
-            current_line = line_info[visit]  # 현재 역의 노선
+            # 출발점에서 첫 방문 처리
+            self.visit_place(start_station, [], 0, end_station)
 
-            # 이전 역이 없을 경우 (즉, 출발역인 경우)
-            if previous_station is None:
-               previous_station = visit
-            
+            # 최단 시간 경로와 시간을 찾기
+            shortest_route, shortest_time = self.find_shortest_route()
+            if shortest_route:
+                print(f"최단 경로: {shortest_route}")
+                print(f"소요 시간: {shortest_time}분")
+            else:
+                print("경로를 찾을 수 없습니다.")
 
-            # 현재 역에서 갈 수 있는 모든 역을 탐색
-            if len(landscape[visit].remove(previous_line)) == 0:
-                
-            if len(landscape[visit].remove(previous_line)) == 1:
-                
-            if len(landscape[visit].remove(previous_line)) == 2:
-                
-                
-            for next_station in landscape[visit]:
-                next_line = line_info[next_station]  # 다음 역의 노선
+    def visit_place(self, visit, route, shortest_time, end_station):
+        print("재귀 호출된 역:", visit)
+        print("현재까지 경로:", route)
 
-                # 환승 시간 고려: 다른 노선으로 갈아탈 경우 6분 추가
-                if not set(previous_line).intersection(set(next_line)):  # 이전 역과 겹치는 노선이 없는 경우
-                    routing[visit]['additional_time'] += 6
-                else:
-                    routing[visit]['additional_time'] += 2  # 같은 노선일 경우 이동 시간은 2분
-                routing[next_station]['route'] = copy.deepcopy(routing[visit]['route'])
-                routing[next_station]['route'].append(next_station)
+        # 이전 역과 노선 정보 설정
+        previous_station = route[-1] if route else ''
+        previous_line = self.line_info[previous_station] if previous_station else []
 
-            # 다음 역을 방문할 때 현재 역의 노선 정보를 전달
-            for next_station in landscape[visit]:
-                if not routing[next_station]['visited']:
-                    visitPlace(next_station, current_line)  # current_line을 previous_line으로 전달
+        # 도착역에 도달한 경우
+        if visit == end_station:
+            new_route = route.copy()
+            new_route.append(visit)
+            self.routing.append({"route": new_route, "shortestTime": shortest_time})
+            print("추가된 도착 경로:", new_route)
+            return
 
-        # 출발점에서 첫 방문 처리
-        visitPlace(start_station)
+        # 현재 역의 노선 정보와 다음 방문할 역들 설정
+        current_line = self.line_info[visit]
+        next_stations = list(set(self.landscape[visit]) - set(route))  # 방문한 역은 제외
+        print(visit, "에서 이동할 역:", next_stations)
 
-        # 다익스트라 알고리즘 실행
-        while True:
-            minDist = float('inf')
-            toVisit = ''
-            # 방문하지 않은 곳 중에서 가장 짧은 거리를 가진 역 선택
-            for name, search in routing.items():
-                if search['additional_time'] < minDist and not search['visited']:
-                    minDist = search['additional_time']
-                    toVisit = name
-            if toVisit == '':
-                break
-            # 선택된 역 방문
-            visitPlace(toVisit)
+        for next_station in next_stations:
+            next_line = self.line_info[next_station]
+            original_shortest_time = shortest_time
 
-        # 결과 출력
-        route = routing[end_station]['route']
-        shortest_time = routing[end_station]['additional_time']
+            # 환승 시간 계산
+            if not set(previous_line).intersection(set(next_line)):
+                shortest_time += 6  # 환승 시 6분 추가
+            else:
+                shortest_time += 2  # 같은 노선일 경우 2분 추가
 
-        # 환승역 확인 및 각 구간 시간 계산
-        transfer_stations = []
-        section_times = []
-        total_time = 0
-        for i in range(1, len(route)):
-            previous_station = route[i - 1]
-            current_station = route[i]
-            previous_line = line_info[previous_station]  # 이전 역의 노선 정보
-            current_line = line_info[current_station]
-            
-            section_time = 2
+            next_route = route.copy()
+            next_route.append(visit)
+            self.visit_place(next_station, next_route, shortest_time, end_station)
 
-            # 다음 역이 존재하는지 검사
-            if i < len(route) - 1:  # 마지막 역이 아니면 다음 역을 검사
-                next_station = route[i+1]
-                next_line = line_info[next_station]
-                if not set(previous_line).intersection(set(next_line)):  # 다른 노선으로 갈아탈 때
-                    transfer_stations.append(current_station)  # 환승역 추가
-                    section_time = 6
-                    
-            section_times.append(section_time)  # 구간별 소요 시간 추가
-            total_time += section_time
+            # 재귀가 끝나면 시간을 원래대로 복원
+            shortest_time = original_shortest_time
 
-        # 환승역과 각 구간의 소요 시간 출력
-        detailed_route = []
-        sum = 0
+    def find_shortest_route(self):
+        """routing 리스트에서 최단 시간을 찾고 경로를 반환"""
+        min_dist = float('inf')
+        shortest_route = None
+
+        for route in self.routing:
+            if route['shortestTime'] < min_dist:
+                min_dist = route['shortestTime']
+                shortest_route = route['route']
+
+        return shortest_route, min_dist
+
+
+# 사용 예시 (시작역과 도착역 설정)
+# start_station_var와 end_station_var는 tkinter의 Entry에서 값을 가져오는 구조
+# line_info: 각 역의 노선 정보를 나타내는 딕셔너리
+# landscape: 각 역에서 갈 수 있는 역 정보를 나타내는 딕셔너리
+
+# calculator = SubwayRouteCalculator(start_station_var, end_station_var, line_info, landscape)
+# calculator.calculate_shortest_time()
+
         
-        for i in range(len(route) - 1):
-            sum += section_times[i]
-            # route[i]가 환승역에 포함되어 있는지 확인
-            if route[i] in transfer_stations:
-                detailed_route.append(f"{route[i]} -> {route[i + 1]} ({sum}분)")
-                sum=0
-        
-        # 마지막 역까지 누적된 시간 출력
-        detailed_route.append(f"{route[-2]} -> {route[-1]} ({sum}분)")
-        
-        # 환승역이 없는 경우 출력
-        if not transfer_stations:
-            print(f"출발역: {start_station} -> 도착역: {end_station}")
-            print(f"소요 시간: {shortest_time}분")
-            result_label.config(text=f"출발역: {start_station} -> 도착역: {end_station}\n소요 시간: {shortest_time}분")
-        # 환승역이 있는 경우 출력
-        else:
-            print(f"출발역: {start_station} -> 환승역: {', '.join(transfer_stations)} -> 도착역: {end_station}")
-            print(f"소요 시간: {shortest_time}분")
-            print("구간별 소요 시간:")
-            for section in detailed_route:
-                print(section)
-            result_label.config(text=f"출발역: {start_station} \n 환승역: {'\n->'.join(transfer_stations)} \n 도착역: {end_station}\n소요 시간: {shortest_time}분\n\n구간별 소요 시간:\n" + "\n".join(detailed_route))
+def calculate_route_and_time(start_station, end_station, route, shortest_time, line_info):
+    # 환승역과 각 구간 시간 계산
+    transfer_stations = []
+    detailed_route = []
+    total_time = 0
+    current_time_sum = 0  # 누적 시간을 저장할 변수
+    
+    for i in range(1, len(route)):
+        previous_station = route[i - 1]
+        current_station = route[i]
+        previous_line = line_info[previous_station]
+        current_line = line_info[current_station]
 
+        # 기본 구간 시간 2분
+        section_time = 2
+
+        # 다음 역이 존재하고 다른 노선으로 갈아탈 때 6분 추가
+        if i < len(route) - 1:
+            next_station = route[i + 1]
+            next_line = line_info[next_station]
+            if not set(previous_line).intersection(set(next_line)):
+                transfer_stations.append(current_station)
+                section_time = 6
+
+        # 누적 시간 계산
+        current_time_sum += section_time
+        total_time += section_time
+
+        # 환승역일 경우 detailed_route에 경로 추가
+        if current_station in transfer_stations:
+            detailed_route.append(f"{previous_station} -> {current_station} ({current_time_sum}분)")
+            current_time_sum = 0
+
+    # 마지막 구간 추가
+    detailed_route.append(f"{route[-2]} -> {route[-1]} ({current_time_sum}분)")
+
+    # 경로 출력 및 결과 설정
+    if not transfer_stations:
+        print(f"출발역: {start_station} -> 도착역: {end_station}")
+        print(f"소요 시간: {shortest_time}분")
+        result_label.config(text=f"출발역: {start_station} -> 도착역: {end_station}\n소요 시간: {shortest_time}분")
+    else:
+        transfer_path = ' -> '.join(transfer_stations)
+        print(f"출발역: {start_station} -> 환승역: {transfer_path} -> 도착역: {end_station}")
+        print(f"소요 시간: {shortest_time}분")
+        print("구간별 소요 시간:")
+        for section in detailed_route:
+            print(section)
+        result_label.config(text=f"출발역: {start_station} \n 환승역: {transfer_path} \n 도착역: {end_station}\n소요 시간: {shortest_time}분\n\n구간별 소요 시간:\n" + "\n".join(detailed_route))
+
+        
+        
             
 # 최단 시간 계산 버튼
-calculate_button = tk.Button(right_frame, text="최단 시간 계산", command=calculate_shortest_time)
+calculator = SubwayRouteCalculator(start_station_var, end_station_var, line_info, landscape)
+calculate_button = tk.Button(right_frame, text="최단 시간 계산", command=calculator.calculate_shortest_time)
 calculate_button.pack(pady=30)
 
 # 결과를 출력할 라벨
